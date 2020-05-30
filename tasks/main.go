@@ -71,7 +71,6 @@ func check(task Task) {
 		}
 
 		body, err := ioutil.ReadAll(resp.Body)
-
 		if err != nil {
 			fmt.Println(err)
 			return
@@ -80,11 +79,9 @@ func check(task Task) {
 		}
 
 		value := string(body)
-
 		fmt.Println(value)
 
 		if value != task.check_value {
-
 			fmt.Println("value don't match, try to make action")
 
 			resp, err := http.Get(task.action_link)
@@ -94,7 +91,6 @@ func check(task Task) {
 			}
 
 			body, err := ioutil.ReadAll(resp.Body)
-
 			if err != nil {
 				fmt.Println(err)
 				return
@@ -103,7 +99,6 @@ func check(task Task) {
 			}
 
 			value := string(body)
-
 			fmt.Println("answer from device: ", value)
 		}
 	}
