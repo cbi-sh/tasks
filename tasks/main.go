@@ -1,10 +1,11 @@
 package main
 
 import (
-	"fmt"
 	"io/ioutil"
 	"net/http"
 	"time"
+
+	log "github.com/sirupsen/logrus"
 )
 
 type Task struct {
@@ -28,7 +29,7 @@ func daySeconds(t time.Time) uint32 {
 func main() {
 
 	done := make(chan bool)
-	ticker := time.NewTicker(10 * time.Second)
+	ticker := time.NewTicker(5 * time.Second)
 
 	go func() {
 		for {
@@ -37,7 +38,9 @@ func main() {
 				ticker.Stop()
 				return
 			case <-ticker.C:
-				fmt.Println("Hello !!")
+
+				log.Info("start checking task")
+
 				perform(Task{
 					name:       "Greenhouse light off",
 					start:      0 * 3600,
@@ -65,44 +68,45 @@ func main() {
 
 func perform(task Task) {
 
+	log.Info("perform task: ", task.name)
+
 	now := daySeconds(time.Now())
-
-	if task.start <= now && now < task.stop {
-		fmt.Printf("checking task: %s\n", task.name)
-
-		resp, err := http.Get(task.checkLink)
-		if err != nil {
-			fmt.Println(err)
-			return
-		}
-
-		body, err := ioutil.ReadAll(resp.Body)
-		if err != nil {
-			fmt.Println(err)
-			return
-		} else {
-			resp.Body.Close()
-		}
-
-		if string(body) != task.checkValue {
-			fmt.Println("value don't match, try to make action")
-
-			resp, err := http.Get(task.actionLink)
-			if err != nil {
-				fmt.Println(err)
-				return
-			}
-
-			body, err := ioutil.ReadAll(resp.Body)
-			if err != nil {
-				fmt.Println(err)
-				return
-			} else {
-				resp.Body.Close()
-			}
-
-			value := string(body)
-			fmt.Println("answer from device: ", value)
-		}
+	if !(task.start <= now && now < task.stop) {
+		log.Info("skip task by time: ", task.name)
+		return
 	}
+
+	resp, err := http.Get(task.checkLink)
+	if err != nil {
+		log.Error("check link error: ", err)
+		return
+	}
+
+	body, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Error("read body error: ", err)
+		return
+	}
+	resp.Body.Close()
+
+	if string(body) == task.checkValue {
+		log.Info("value ok, ", task.name)
+		return
+	}
+
+	log.Info("value don't match, try to make action")
+	resp, err = http.Get(task.actionLink)
+	if err != nil {
+		log.Error("check link error: ", err)
+		return
+	}
+
+	body, err = ioutil.ReadAll(resp.Body)
+	if err != nil {
+		log.Error("read body error: ", err)
+		return
+	}
+	resp.Body.Close()
+
+	log.Error("answer from device: ", string(body))
 }
