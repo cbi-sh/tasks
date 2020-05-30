@@ -50,7 +50,6 @@ func main() {
 		}
 	}()
 
-	// wait for 10 seconds
 	time.Sleep(10000 * time.Second)
 	done <- true
 }
