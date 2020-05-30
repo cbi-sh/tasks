@@ -13,10 +13,10 @@ type Task struct {
 	start uint32
 	stop  uint32
 
-	check_link  string
-	check_value string
+	checkLink  string
+	checkValue string
 
-	action_link string
+	actionLink string
 }
 
 func daySeconds(t time.Time) uint32 {
@@ -28,7 +28,7 @@ func daySeconds(t time.Time) uint32 {
 func main() {
 
 	done := make(chan bool)
-	ticker := time.NewTicker(5 * time.Second)
+	ticker := time.NewTicker(10 * time.Second)
 
 	go func() {
 		for {
@@ -38,33 +38,39 @@ func main() {
 				return
 			case <-ticker.C:
 				fmt.Println("Hello !!")
-				check(Task{
-					name:        "Greenhouse light on",
-					start:       6 * 3600,
-					stop:        23*3600 + 59*60 + 59,
-					check_link:  "http://192.168.0.21/light",
-					check_value: "1",
-					action_link: "http://192.168.0.21/light/on",
+				perform(Task{
+					name:       "Greenhouse light off",
+					start:      0 * 3600,
+					stop:       5*3600 + 59*60 + 59,
+					checkLink:  "http://192.168.0.21/light",
+					checkValue: "0",
+					actionLink: "http://192.168.0.21/light/off",
+				})
+				fmt.Println("Hello !@")
+				perform(Task{
+					name:       "Greenhouse light on",
+					start:      6 * 3600,
+					stop:       23*3600 + 59*60 + 59,
+					checkLink:  "http://192.168.0.21/light",
+					checkValue: "1",
+					actionLink: "http://192.168.0.21/light/on",
 				})
 			}
 		}
 	}()
 
-	time.Sleep(10000 * time.Second)
+	time.Sleep(1000000 * time.Second)
 	done <- true
 }
 
-func check(task Task) {
-
-	fmt.Printf("%+v\n", task)
-	fmt.Printf("%+v\n", daySeconds(time.Now()))
+func perform(task Task) {
 
 	now := daySeconds(time.Now())
 
 	if task.start <= now && now < task.stop {
 		fmt.Printf("checking task: %s\n", task.name)
 
-		resp, err := http.Get(task.check_link)
+		resp, err := http.Get(task.checkLink)
 		if err != nil {
 			fmt.Println(err)
 			return
@@ -78,13 +84,10 @@ func check(task Task) {
 			resp.Body.Close()
 		}
 
-		value := string(body)
-		fmt.Println(value)
-
-		if value != task.check_value {
+		if string(body) != task.checkValue {
 			fmt.Println("value don't match, try to make action")
 
-			resp, err := http.Get(task.action_link)
+			resp, err := http.Get(task.actionLink)
 			if err != nil {
 				fmt.Println(err)
 				return
