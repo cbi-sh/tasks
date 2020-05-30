@@ -46,7 +46,7 @@ func main() {
 					checkValue: "0",
 					actionLink: "http://192.168.0.21/light/off",
 				})
-				fmt.Println("Hello !@")
+
 				perform(Task{
 					name:       "Greenhouse light on",
 					start:      6 * 3600,
