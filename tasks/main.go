@@ -28,7 +28,7 @@ func daySeconds(t time.Time) uint32 {
 func main() {
 
 	done := make(chan bool)
-	ticker := time.NewTicker(10 * time.Second)
+	ticker := time.NewTicker(5 * time.Second)
 
 	go func() {
 		for {
@@ -38,7 +38,14 @@ func main() {
 				return
 			case <-ticker.C:
 				fmt.Println("Hello !!")
-				check()
+				check(Task{
+					name:        "Greenhouse light on",
+					start:       6 * 3600,
+					stop:        23*3600 + 59*60 + 59,
+					check_link:  "http://192.168.0.21/light",
+					check_value: "1",
+					action_link: "http://192.168.0.21/light/on",
+				})
 			}
 		}
 	}()
@@ -48,15 +55,7 @@ func main() {
 	done <- true
 }
 
-func check() {
-	task := Task{
-		name:        "Greenhouse light on",
-		start:       6 * 3600,
-		stop:        23*3600 + 59*60 + 59,
-		check_link:  "http://192.168.0.21/light",
-		check_value: "1",
-		action_link: "http://192.168.0.21/light/on",
-	}
+func check(task Task) {
 
 	fmt.Printf("%+v\n", task)
 	fmt.Printf("%+v\n", daySeconds(time.Now()))
@@ -69,12 +68,16 @@ func check() {
 		resp, err := http.Get(task.check_link)
 		if err != nil {
 			fmt.Println(err)
+			return
 		}
-		defer resp.Body.Close()
+
 		body, err := ioutil.ReadAll(resp.Body)
 
 		if err != nil {
 			fmt.Println(err)
+			return
+		} else {
+			resp.Body.Close()
 		}
 
 		value := string(body)
@@ -88,12 +91,16 @@ func check() {
 			resp, err := http.Get(task.action_link)
 			if err != nil {
 				fmt.Println(err)
+				return
 			}
-			defer resp.Body.Close()
+
 			body, err := ioutil.ReadAll(resp.Body)
 
 			if err != nil {
 				fmt.Println(err)
+				return
+			} else {
+				resp.Body.Close()
 			}
 
 			value := string(body)
