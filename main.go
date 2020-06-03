@@ -108,5 +108,5 @@ func perform(task Task) {
 	}
 	resp.Body.Close()
 
-	log.Error("answer from device: ", string(body))
+	log.Info("answer from device: ", string(body))
 }
