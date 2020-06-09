@@ -41,7 +41,7 @@ func main() {
 
 				log.Info("start checking task")
 
-				perform(Task{
+				perform(&Task{
 					name:       "Greenhouse light off",
 					start:      0 * 3600,
 					stop:       5*3600 + 59*60 + 59,
@@ -50,7 +50,7 @@ func main() {
 					actionLink: "http://192.168.0.21/light/off",
 				})
 
-				perform(Task{
+				perform(&Task{
 					name:       "Greenhouse light on",
 					start:      6 * 3600,
 					stop:       23*3600 + 59*60 + 59,
@@ -66,7 +66,7 @@ func main() {
 	done <- true
 }
 
-func perform(task Task) {
+func perform(task *Task) {
 
 	log.Info("perform task: ", task.name)
 
