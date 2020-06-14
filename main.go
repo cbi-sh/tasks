@@ -26,47 +26,7 @@ func daySeconds(t time.Time) uint32 {
 	return uint32(t.Sub(midnight).Seconds())
 }
 
-func main() {
-
-	done := make(chan bool)
-	ticker := time.NewTicker(5 * time.Second)
-
-	go func() {
-		for {
-			select {
-			case <-done:
-				ticker.Stop()
-				return
-			case <-ticker.C:
-
-				log.Info("start checking task")
-
-				perform(&Task{
-					name:       "Greenhouse light off",
-					start:      0 * 3600,
-					stop:       5*3600 + 59*60 + 59,
-					checkLink:  "http://192.168.0.21/light",
-					checkValue: "0",
-					actionLink: "http://192.168.0.21/light/off",
-				})
-
-				perform(&Task{
-					name:       "Greenhouse light on",
-					start:      6 * 3600,
-					stop:       23*3600 + 59*60 + 59,
-					checkLink:  "http://192.168.0.21/light",
-					checkValue: "1",
-					actionLink: "http://192.168.0.21/light/on",
-				})
-			}
-		}
-	}()
-
-	time.Sleep(1000000 * time.Second)
-	done <- true
-}
-
-func perform(task *Task) {
+func (task *Task) perform() {
 
 	log.Info("perform task: ", task.name)
 
@@ -109,4 +69,44 @@ func perform(task *Task) {
 	resp.Body.Close()
 
 	log.Info("answer from device: ", string(body))
+}
+
+func main() {
+
+	done := make(chan bool)
+	ticker := time.NewTicker(5 * time.Second)
+
+	go func() {
+		for {
+			select {
+			case <-done:
+				ticker.Stop()
+				return
+			case <-ticker.C:
+
+				log.Info("start checking task")
+
+				(&Task{
+					name:       "Greenhouse light off",
+					start:      0 * 3600,
+					stop:       5*3600 + 59*60 + 59,
+					checkLink:  "http://192.168.0.21/light",
+					checkValue: "0",
+					actionLink: "http://192.168.0.21/light/off",
+				}).perform()
+
+				(&Task{
+					name:       "Greenhouse light on",
+					start:      6 * 3600,
+					stop:       23*3600 + 59*60 + 59,
+					checkLink:  "http://192.168.0.21/light",
+					checkValue: "1",
+					actionLink: "http://192.168.0.21/light/on",
+				}).perform()
+			}
+		}
+	}()
+
+	time.Sleep(1000000 * time.Second)
+	done <- true
 }
