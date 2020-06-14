@@ -20,15 +20,9 @@ type Task struct {
 	actionLink string
 }
 
-func daySeconds(t time.Time) uint32 {
-	year, month, day := t.Date()
-	midnight := time.Date(year, month, day, 0, 0, 0, 0, t.Location())
-	return uint32(t.Sub(midnight).Seconds())
-}
+func (task *Task) Perform() {
 
-func (task *Task) perform() {
-
-	log.Info("perform task: ", task.name)
+	log.Info("Perform task: ", task.name)
 
 	now := daySeconds(time.Now())
 	if !(task.start <= now && now < task.stop) {
@@ -71,6 +65,12 @@ func (task *Task) perform() {
 	log.Info("answer from device: ", string(body))
 }
 
+func daySeconds(t time.Time) uint32 {
+	year, month, day := t.Date()
+	midnight := time.Date(year, month, day, 0, 0, 0, 0, t.Location())
+	return uint32(t.Sub(midnight).Seconds())
+}
+
 func main() {
 
 	done := make(chan bool)
@@ -93,7 +93,7 @@ func main() {
 					checkLink:  "http://192.168.0.21/light",
 					checkValue: "0",
 					actionLink: "http://192.168.0.21/light/off",
-				}).perform()
+				}).Perform()
 
 				(&Task{
 					name:       "Greenhouse light on",
@@ -102,7 +102,7 @@ func main() {
 					checkLink:  "http://192.168.0.21/light",
 					checkValue: "1",
 					actionLink: "http://192.168.0.21/light/on",
-				}).perform()
+				}).Perform()
 			}
 		}
 	}()

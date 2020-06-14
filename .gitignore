@@ -1,7 +1,2 @@
-*.dll
-*.so
-*.dylib
-*.test
-*.out
-
 .idea/
+/tasks
