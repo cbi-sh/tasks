@@ -1,14 +1,18 @@
 .PHONY: setup
-setup: ## Install all the build and lint dependencies
+setup: ## Install all dependencies
 	go get -u github.com/sirupsen/logrus
+
+.PHONY: clean
+clean: ## Remove temporary files
+	go clean
 
 .PHONY: build
 build: ## Build a version
 	go build -v ./...
 
-.PHONY: clean
-clean: ## Remove temporary files
-	go clean
+.PHONY: install
+install: ## Install app locally
+	go install
 
 .PHONY: help
 help:

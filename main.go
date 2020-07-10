@@ -21,7 +21,7 @@ type Task struct {
 	actionLink string
 }
 
-func (task *Task) Perform() {
+func (task Task) Perform() {
 
 	now := daySeconds(time.Now())
 	if !(task.start <= now && now < task.stop) {
@@ -76,32 +76,34 @@ func main() {
 	ticker := time.NewTicker(5 * time.Second)
 
 	go func() {
+		tasks := []Task{
+			{
+				name:       "Hold light off",
+				start:      0 * 3600,
+				stop:       5*3600 + 59*60 + 59,
+				checkLink:  "http://192.168.0.21/light",
+				checkValue: "0",
+				actionLink: "http://192.168.0.21/light/off",
+			},
+			{
+				name:       "Hold light on",
+				start:      6 * 3600,
+				stop:       23*3600 + 59*60 + 59,
+				checkLink:  "http://192.168.0.21/light",
+				checkValue: "1",
+				actionLink: "http://192.168.0.21/light/on",
+			},
+		}
+
 		for {
 			select {
 			case <-done:
 				ticker.Stop()
 				return
 			case <-ticker.C:
-
-				log.Info("start checking task")
-
-				(&Task{
-					name:       "Hold light off",
-					start:      0 * 3600,
-					stop:       5*3600 + 59*60 + 59,
-					checkLink:  "http://192.168.0.21/light",
-					checkValue: "0",
-					actionLink: "http://192.168.0.21/light/off",
-				}).Perform()
-
-				(&Task{
-					name:       "Hold light on",
-					start:      6 * 3600,
-					stop:       23*3600 + 59*60 + 59,
-					checkLink:  "http://192.168.0.21/light",
-					checkValue: "1",
-					actionLink: "http://192.168.0.21/light/on",
-				}).Perform()
+				for _, task := range tasks {
+					task.Perform()
+				}
 			}
 		}
 	}()
