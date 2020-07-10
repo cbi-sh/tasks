@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"io/ioutil"
 	"net/http"
 	"time"
@@ -21,8 +22,6 @@ type Task struct {
 }
 
 func (task *Task) Perform() {
-
-	log.Info("Perform task: ", task.name)
 
 	now := daySeconds(time.Now())
 	if !(task.start <= now && now < task.stop) {
@@ -87,7 +86,7 @@ func main() {
 				log.Info("start checking task")
 
 				(&Task{
-					name:       "Greenhouse light off",
+					name:       "Hold light off",
 					start:      0 * 3600,
 					stop:       5*3600 + 59*60 + 59,
 					checkLink:  "http://192.168.0.21/light",
@@ -96,7 +95,7 @@ func main() {
 				}).Perform()
 
 				(&Task{
-					name:       "Greenhouse light on",
+					name:       "Hold light on",
 					start:      6 * 3600,
 					stop:       23*3600 + 59*60 + 59,
 					checkLink:  "http://192.168.0.21/light",
@@ -107,6 +106,6 @@ func main() {
 		}
 	}()
 
-	time.Sleep(1000000 * time.Second)
+	fmt.Scanln()
 	done <- true
 }
