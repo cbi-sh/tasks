@@ -80,14 +80,14 @@ func main() {
 			{
 				name:       "Hold light off",
 				start:      0 * 3600,
-				stop:       5*3600 + 59*60 + 59,
+				stop:       10*3600 + 59*60 + 59,
 				checkLink:  "http://192.168.0.21/light",
 				checkValue: "0",
 				actionLink: "http://192.168.0.21/light/off",
 			},
 			{
 				name:       "Hold light on",
-				start:      6 * 3600,
+				start:      11 * 3600,
 				stop:       23*3600 + 59*60 + 59,
 				checkLink:  "http://192.168.0.21/light",
 				checkValue: "1",
